@@ -1,0 +1,157 @@
+\documentclass{article}[12pt]
+\usepackage{fullpage}
+% Packages
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amsthm}
+
+\theoremstyle{plain}
+\newtheorem{lemma}{Lemma}
+\newtheorem{claim}[lemma]{Claim}
+\newtheorem{theorem}[lemma]{Theorem}
+\newtheorem{corollary}[lemma]{Corollary}
+
+\newcommand{\vx}{\vec{x}}
+\newcommand{\vr}{\vec{r}}
+\newcommand{\vp}{\vec{p}}
+\newcommand{\vW}{\vec{W}}
+\newcommand{\vl}{\vec{\ell}}
+\newcommand{\grad}{\bigtriangledown}
+
+\title{An analysis of NormalHedge}
+\author{Yoav Freund}
+\begin{document}
+\maketitle
+
+We define the scalar potential of a single expert whose cumulative
+regret at time $t$ is $x$ to be:
+\[
+\phi(x,t) \doteq 
+\begin{cases} 
+e^{\frac{x^2}{3t}} &\mbox{if } x \geq 0 \\
+1 & \mbox{otherwise}
+\end{cases} 
+\]
+
+We define a vector of cumulative regrets for $n$ experts to be
+\[
+\vx = \langle x_1,\ldots,x_n\rangle
+\]
+and the potential w.r.t. such a vector to be
+\[
+\Phi(\vx,t) = \frac{1}{n} \sum_{i=1}^n \phi(x_i,t)
+\]
+
+The gradient of the potential function with respect to $x_i$ is the
+(unnormalized) weight vector:
+\[
+w_i \doteq \frac{1}{Z} \frac{\partial}{\partial x_i} \Phi(\vx,t) 
+= 
+\begin{cases} 
+\frac{1}{Z} x_i \Phi(x_i,t) &\mbox{if } x_i \geq 0 \\
+0 & \mbox{otherwise}
+\end{cases} 
+\]
+$Z=\sum_{x_i\geq 0}^n x_i \Phi(x_i,t)$ is the normalization number, so that
+$\sum_{i=1}^n w_i=1$. 
+
+The instantanous loss is denoted by the vector $\vl \in [-1,+1]^n$.
+The instantanuous loss of the algorithm is defined to be
+\[
+L \doteq \sum_{i=1}^n w_i \ell_i
+\]
+The instantanous regret $\vr$ is defined by $r_i = \ell_i-L$.
+
+Given a cumulative regret vector at time $t$ $\vx(t)$, and an
+instantanous regret vector $\vr(t)$ we define the cumulative
+regret vector at time $t+1$ to be
+\[
+\vx(t+1)=\vx(t)+\vr
+\]
+
+\newcommand{\oneVec}{\vec{\mathbf 1}}
+\begin{theorem}
+For any cumulative regret vector $\vx$, any $t \geq 1$,
+such that $\Phi(\vx,t) = e$, 
+and any instantaneous loss vector $\vl  \in [-1,+1]^n$
+\[
+\Phi(\vx+\vr,t+1) \leq e
+\]
+Where $\vr \doteq \vl-L \oneVec$, and $\oneVec$ is the vector all of
+whose components are 1.
+\end{theorem} 
+
+We prove the theorem using a sequence of transformations from the
+original configuration defined by $\vx$ and $\vl$ to configurations
+whose final potential $\Phi(\vx+\vr,t+1)$ is higher until we arrive at
+a specific ``worst case'' configuration. For the worst case
+configuration we can show directly that the final potential is lower
+than the initial one.
+
+Let us denote the original configuration of $n$ experts by $\vx, \vr$.
+
+\begin{enumerate}
+\item{\bf The spreading transformation} In this step we replace each
+  of the original $n$ experts by a pair of experts: one with loss $-1$
+  and the other with loss $+1$, to keep the expected regret vector
+  $\vr$  unchanged we assign unequal weights to the two
+  experts.  For ease of notation we index the new experts as
+  $(1,1),\ldots,(1,n),(2,1)\ldots,(2,n)$, thus the pair $(1,i),(2,i)$
+  corresponds to the original $i$th expert. 
+
+  We have that the cumulative regret of the new set is $\vx,\vx$, the
+  loss vector is $\oneVec,-\oneVec$ Finally, the relative weights
+  $\vp$ to preserve, for each $i=1,\ldots,n$: the expected loss:
+  $p_i+(1-p_i)=\ell_i$. Thus $p_{1,i}=\frac{\ell_i+1}{2}$ and
+  $p_{2,i}=\frac{\ell_i-1}{2}$. 
+
+  That this transformation can only increase the average potential at
+  the next step follows directly from the convexity of $\Phi(x,t)$.
+
+\item {\bf Scaling time to 1}
+\newcommand{\nvx}{\widehat{\vx}}
+\newcommand{\nxi}{\widehat{x_i}}
+\newcommand{\nvr}{\widehat{\vr}}
+\newcommand{\nri}{\widehat{r_i}}
+In this step we how that a configuration in which time increases from $t$ to
+$t+1$ is equivalent to another configuration in which time increases
+from $1$ to $1+(1/t)$. Define $\nvx, \nvr$ to be normalized versions of
+$\vx,\vr$ where $\nxi \doteq x_i/\sqrt{t}$ and $\nri \doteq
+r_i/\sqrt{t}$. Using these definitions we have:
+\[
+\Phi(\vx,t) = \sum_{x_i < 0} 1 +\sum_{x_i \geq 0} \exp\left(\frac{x_i^2}{3t}\right) 
+=  \sum_{\nxi < 0} 1 + \sum_{\nxi \geq 0} \exp\left(\frac{\nxi^2}{3}\right)=\Phi(\nvx,1) 
+\]
+and
+\[
+\Phi(\vx+\vr,t+1) = \sum_{x_i+r_i < 0} 1 
++ \sum_{x_i+r_i \geq 0} \exp\left(\frac{(x_i+r_i)^2}{3(t+1)}\right) 
+= \sum_{\nxi+\nri < 0} 1 
++ \sum_{\nxi+\nri \geq 0} \exp\left(\frac{(\nxi+\nri)^2}{3(1+1/t)}\right)
+=\Phi(\nvx+\nvr,1+1/t) 
+\]
+
+In what follows we find it convenient to denote $d=1/\sqrt{t}$ and to
+allow $t$ to be any real value, rather than just integers.
+
+\item {\bf The Lagrange multipliers}
+After steps 1 and 2 we are left with a restricted case in which $t$ is
+replaced by $1$ and $t+1$ is replaced by $t+d^2$. Each one of the
+original $n$ experts is replaced by two experts, one with loss $+d$
+and the other with loss $-d$. There are two constraints on the initial
+configuration (we go back to the notation $\vx,\vl,\vr$ to simplify the
+presentation)
+ 
+\begin{equation}
+C_1(\vx)=\Phi(\vx,1)=e
+\end{equation}
+
+\begin{equation}
+L=\sum
+\end{equation}
+
+
+\end{enumerate}
+
+
+\end{document}

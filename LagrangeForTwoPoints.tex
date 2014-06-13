@@ -1,0 +1,290 @@
+\documentclass{article}[12pt]
+\usepackage{fullpage}
+% Packages
+\usepackage{amsfonts}
+\usepackage{amsmath}
+\usepackage{amsthm}
+
+\theoremstyle{plain}
+\newtheorem{lemma}{Lemma}
+\newtheorem{claim}[lemma]{Claim}
+\newtheorem{theorem}[lemma]{Theorem}
+\newtheorem{corollary}[lemma]{Corollary}
+
+\newcommand{\vx}{\vec{x}}
+\newcommand{\vr}{\vec{r}}
+\newcommand{\vp}{\vec{p}}
+\newcommand{\vW}{\vec{W}}
+\newcommand{\vl}{\vec{\ell}}
+\newcommand{\grad}{\bigtriangledown}
+
+\title{Lagrangian analysis for two points}
+\author{Yoav Freund}
+\begin{document}
+\maketitle
+
+\newcommand{\paren}[1]{\left( #1 \right)}
+\newcommand{\pot}[2]{\phi\left( #1,#2 \right)}
+\newcommand{\potExpr}[2]{\exp\left( \frac{#1^2}{3 #2}\right)}
+\newcommand{\dT}[1]{D(#1)}
+\newcommand{\dR}[1]{R(#1)}
+\newcommand{\dA}[1]{A(#1)}
+\newcommand{\dB}[1]{B(#1)}
+\newcommand{\thirdCol}[2]{#2 \left(1+ \frac{2}{3} #1^2\right) \potExpr{#1}{}}
+\newcommand{\thirdColSimp}[2]{#2 \paren{\frac{1}{#1}+ \frac{2}{3} #1}\potExpr{#1}{}}
+
+We define the scalar potential of a single expert whose cumulative
+regret at time $t$ is $x$ to be:
+\[
+\pot{x}{t} \doteq 
+\begin{cases} 
+e^{\frac{x^2}{3t}} &\mbox{if } x \geq 0 \\
+1 & \mbox{otherwise}
+\end{cases} 
+\]
+
+In what follows we will always assume that $x\geq 0$ so that only the
+first case matters.
+\[
+\pot{x}{t} = \potExpr{x}{t}
+\]
+
+We restrict our attention to two experts, defined by the five parameters
+$(x_1,x_2,p_1,p_2,q)$. Where $x_1,x_2 \geq 0$ are the cumulative
+regrets. $0 \leq p_1,p_2 \leq 1$ are the probabilities associated with
+a loss of $1$, and $(q,1-q)$ are the probabilities associated with the
+first and the second experts respectively.
+
+We assume that $t$ has been folded into $x_1,x_2$ so that the initial
+time is $t=1$. The final time is $t=1+d^2$ for some small $d>0$.
+\newcommand{\changeExpr}[5]{#2 \potExpr{\paren{#1 #4 #3}}{\paren{1+#3^2}}+(1-#2) \potExpr{\paren{#1 #5 #3}}{\paren{1+#3^2}}-\potExpr{#1}{} }
+
+We denote the increase in potential for a particular $x$ by 
+\begin{eqnarray*}
+\psi(x,p,d,L)&=&
+p \pot{x+(1-L)d}{1+d^2}
++(1-p) \pot{x+(-1-L)d}{1+d^2}
+-\pot{x}{1} \\
+&=&
+\changeExpr{x}{p}{d}{+(1-L)}{+(-1-L)}
+\end{eqnarray*}
+
+We define a single expert $x_3,p_3$ that can replace the two experts
+while conserving two quantities: the average potential and the average
+loss. Conservation of average potential gives:
+\begin{equation}
+q\potExpr{x_1}{}+(1-q)\potExpr{x_2}{} = \potExpr{x_3}{} \label{eqn:C1}
+\end{equation}
+from which we can derive the value of $x_3$. Conservation of average
+loss gives:
+\begin{equation}
+q p_1 x_1 \potExpr{x_1}{}+(1-q) p_2 x_2 \potExpr{x_2}{} = p_3 x_3 \potExpr{x_3}{}
+\label{eqn:C2}
+\end{equation}
+from which we can derive $p_3$. The conservation of average loss means
+also that $L=p_3\cdot 1 + (1-p_3) \cdot (1-p_3) = 2p_3-1$.
+
+Our goal is to show that the potential never increases. The step we
+take towards this goal is to show that combining $(x_1,p_1)$ and
+$(x_2,p_2)$ into $(x_3,p_3)$ will always increase the future
+potential.
+
+In symbols, that is:
+\begin{eqnarray}
+T(s) &= q& \paren{\changeExpr{x_1}{p_1}{d}{-2p_3}{+(2-2p_3)}} \\
+&+
+(1-q)&\paren{\changeExpr{x_2}{p_2}{d}{-2p_3}{+(2-2p_3)}} \notag \\
+&-
+&\paren{\changeExpr{x_3}{p_3}{d}{-2p_3}{+(2-2p_3)}} \notag
+\end{eqnarray}
+
+The function $T(s)$ is defined over the set $A\subset R^8$.
+A generic element of $A$ is denoted by
+$s=\langle x_1,x_2,x_3,p_1,p_2,p_3,q,d \rangle \in A$. The conditions
+that define $A$ are:
+\begin{enumerate}
+\item $d>0$ is the ``step'' variable.
+\item $1 \geq  p_1,p_2,p_3,q \geq 0$ are mixture proportions.
+\item $x_1,x_2,x_3 \geq 2p_3 d$ are the ``positions'' of the three
+  experts. 
+\item The constraints given in Equations~(\ref{eqn:C1})
+  and~(\ref{eqn:C2}) hold. 
+\end{enumerate}
+
+We want to show that:
+\begin{claim}
+\[
+\sup \left\{T(s)\left| s \in A \right.\right\} \leq 0
+\]
+\end{claim}
+
+\section{Restricting to one degree of freedom}
+Suppose that out of the six degrees of freedom 
+we fix five: $x_3,p_1,p_2,q,d$, we and vary one: $x_1$. 
+Equation~(\ref{eqn:C1}) gives us $x_2$ (or that there is no solution)
+and Equation~(\ref{eqn:C2}) gives us $p_3$. 
+
+The claim is that the maximum of $T$ as we vary $x_1$,(which
+determines $x_2,p_3$) is always achieved when $x_1=x_2=x_3$.
+
+\section{Using the Lagrangian}
+One approach that seems promising is to use the Lagrangian. We
+redifine Equations~(\ref{eqn:C1}) and~(\ref{eqn:C2}) using variables $C_1,C_2$:
+\begin{equation}
+C_1\doteq q \potExpr{x_1}{}+(1-q)\potExpr{x_2}{} -\potExpr{x_3}{},\;\;\; C_1=0
+\end{equation}
+\begin{equation}
+C_2\doteq p_1 x_1 \potExpr{x_1}{}+(1-q) p_2 x_2 \potExpr{x_2}{} - p_3
+x_3 \potExpr{x_3}{},\;\;\;C_2=0
+%\label{eqn:C2}
+\end{equation}
+We then define the lagrangian:
+\newcommand{\Lag}{{\cal L}}
+\[
+\Lag \doteq T+\lambda_1 C_1 +\lambda_2 C_2
+\]
+
+The condition we are seeking is that
+\newcommand{\parti}[1]{\frac{\partial}{\partial #1}} 
+\[
+\parti{x_1} \Lag=0,\;\;
+\parti{x_2} \Lag=0,\;\;
+\parti{x_3} \Lag=0,\;\;
+\]
+Where $\lambda_1\neq 0$ or $\lambda_2 \neq 0$.
+
+Another, more revealing way to state these conditions is to say that
+the rank of the following matrix is two:
+\newcommand{\Mlag}{{\cal M}}
+\begin{equation}
+\Mlag \doteq
+\begin{pmatrix}
+ \parti{x_1} T & \parti{x_1} C_1 & \parti{x_1} C_2\\
+ \parti{x_2} T & \parti{x_2} C_1 & \parti{x_2} C_2\\
+ \parti{x_3} T & \parti{x_3} C_1 & \parti{x_3} C_2
+ \end{pmatrix} 
+\end{equation}
+
+With the help of Maple we find that 
+\begin{equation}
+\Mlag=
+\paren{
+\begin{array}{c|c|c}
+q \dT{x_1,p_1} & q x_1 \potExpr{x_1}{} &
+q \thirdCol{x_1}{p_1} \\
+\hline
+(1-q) \dT{x_2,p_2} & (1-q) x_2 \potExpr{x_2}{} &
+(1-q) \thirdCol{x_2}{p_2} \\
+\hline
+- \dT{x_3,p_3} & - x_3 \potExpr{x_3}{} &
+- \thirdCol{x_3}{p_3} \\
+\end{array}
+}
+\label{eqn:Matrix}
+\end{equation}
+Where
+\begin{equation}
+\dT{x,p} \doteq 
+\frac{p(x+(2-2p_3)d)}{1+d^2}\exp\paren{\frac{\paren{x+(2-2p_3)d}^2}{3(1+d^2)}}
++
+\frac{(1-p)(x-2p_3d)}{1+d^2}\exp\paren{\frac{\paren{x-2p_3d}^2}{3(1+d^2)}}
+- x e^{x^2 / 3}
+\label{eqn:DT}
+\end{equation}
+
+Multiplying a row or a column by a non-zero constant does not change
+the rank. Therefor we can devide the first row by $q$, the second row
+by $(1-q)$ and reverse the sign in the last row to get:
+\[
+\Mlag' =
+\paren{
+\begin{array}{c|c|c}
+\dT{x_1,p_1} & x_1 \potExpr{x_1}{} &
+\thirdCol{x_1}{p_1} \\
+\hline
+\dT{x_2,p_2} & x_2 \potExpr{x_2}{} &
+\thirdCol{x_2}{p_2} \\
+\hline
+\dT{x_3,p_3} & x_3 \potExpr{x_3}{} &
+\thirdCol{x_3}{p_3}
+\end{array}
+}
+\]
+
+Suppose $x_1=x_2$. From condition~(\ref{eqn:C1}) we find that
+$x=x_3=x_1=x_2$. and from condition~(\ref{eqn:C2}) we find that
+\[
+p_3 = q p_1 + (1-q) p_2
+\]  
+Plugging these into Equation~(\ref{eqn:Matrix})
+\[
+\Mlag'' =
+\paren{
+\begin{array}{c|c|c}
+\dT{x,p_1} & x \potExpr{x}{} &
+\thirdCol{x}{p_1} \\
+\hline
+\dT{x,p_2} & x \potExpr{x}{} &
+\thirdCol{x}{p_2} \\
+\hline
+\dT{x,p_3} & x \potExpr{x}{} &
+\thirdCol{x}{p_3} \\
+\end{array}
+}
+\]
+
+The sum of the first row times $q$ and the second row times $1-q$ is
+equal to the third row. We therefor find that the rank of the matrix
+is 2 and the point is indeed an extremal point.
+
+What remains to be shown is that:
+\begin{enumerate}
+\item This extremal point is a maximum.
+\item This extremal point is the global maximum (rather than one of
+  the points on the boundry.
+\item That the maximum under the condition $x_1=x_2=x_3$ is smaller
+  than zero.~\footnote{I had a guess that the maximum is achieved when
+    $p_1=p_2=p_3=1/2$, but kamalika showd that when $d>0$ the maximum
+    is achieved elsewhere.}
+\end{enumerate}
+
+
+\section{$x_1 \neq x_2 \neq x_3$}
+We simplify the matrix $\Mlag'$ further. We subtract Column 2 from
+$\dT{x_i,p_i}$, and then divide row $i$ by $x_i$.
+We get
+\[\Mlag''' =
+\paren{
+\begin{array}{c|c|c}
+\dR{x_1,p_1} & \potExpr{x_1}{} &
+\thirdColSimp{x_1}{p_1} \\
+\hline
+\dR{x_2,p_2} & \potExpr{x_2}{} &
+\thirdColSimp{x_2}{p_2} \\
+\hline
+\dR{x_3,p_3} & \potExpr{x_3}{} &
+\thirdColSimp{x_3}{p_3}
+\end{array}
+}
+\]
+Where
+\begin{eqnarray*}
+\dR{x,p} &\doteq& 
+\frac{p(x+(2-2p_3)d)}{x(1+d^2)}\exp\paren{\frac{\paren{x+(2-2p_3)d}^2}{3(1+d^2)}}
++
+\frac{(1-p)(x-2p_3d)}{x(1+d^2)}\exp\paren{\frac{\paren{x-2p_3d}^2}{3(1+d^2)}}
+\\
+&=& \dA{x} + p \dB{x}
+\end{eqnarray*}
+Where
+\[
+\dA{x} \doteq 
+\frac{x-2p_3d}{x(1+d^2)}\exp\paren{\frac{\paren{x-2p_3d}^2}{3(1+d^2)}}
+\]
+and
+\[
+\dB{x} \doteq 
+\frac{x+(2-2p_3)d}{x(1+d^2)}\exp\paren{\frac{\paren{x+(2-2p_3)d}^2}{3(1+d^2)}}
+- \frac{x-2p_3d}{x(1+d^2)}\exp\paren{\frac{\paren{x-2p_3d}^2}{3(1+d^2)}}
+\]
+\end{document}
